@@ -40,7 +40,7 @@ categories:
 ### CMake设置
 
 * `OPENCV_EXTRA_MODULES_PATH` 选择Contrib的路径，然后重新Configure
-* `WITH_EIGEN` 勾上，Eigen的配置可以参考[Eigen库加入工程编译](../20210118_Eigen库加入工程编译/)
+* `WITH_EIGEN` 勾上，Eigen的配置可以参考{% post_link Eigen库加入工程编译 false %}
 * 如果是Intel的CPU，可以把MKL相关的勾上，这是Intel为自家CPU专门开发的数学运算库，AMD也能用
 * OpenMP可选
 * OpenCV设置

@@ -9,7 +9,7 @@ categories:
 ---
 
 ## OpenCV使用
-&ensp;&ensp;&ensp;&ensp;[编译OpenCV4-5-1和Contrib库](20210117_编译OpenCV4-5-1和Contrib库)介绍了MSVC编译OpenCV，编译出来的库是导入VS使用，这里要在CMake工程中使用，用原来编译的库即可。另外，CUDA在Windows上只支持MSVC
+&ensp;&ensp;&ensp;&ensp;{% post_link 编译OpenCV4-5-1和Contrib库 false %}介绍了MSVC编译OpenCV，编译出来的库是导入VS使用，这里要在CMake工程中使用，用原来编译的库即可。另外，CUDA在Windows上只支持MSVC
 <!-- more -->
 
 ### OpenCV加入CMake工程
