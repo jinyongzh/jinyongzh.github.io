@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","images":"/images","scheme":"Pisces","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":1},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+<meta name="description" content="生成OpenCV编译工程&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;OpenCV是一个开源的计算机视觉库，集成了很多常用的计算机视觉算法，另外一些需要版权的算法则放到Contrib库里，这里基于VS2019编译CUDA版的OpenCV。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编译OpenCV4.5.1和Contrib库">
+<meta property="og:url" content="http://example.com/2021/0117/%E7%BC%96%E8%AF%91OpenCV4-5-1%E5%92%8CContrib%E5%BA%93/index.html">
+<meta property="og:site_name" content="渊渟无迹">
+<meta property="og:description" content="生成OpenCV编译工程&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;OpenCV是一个开源的计算机视觉库，集成了很多常用的计算机视觉算法，另外一些需要版权的算法则放到Contrib库里，这里基于VS2019编译CUDA版的OpenCV。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/0117/%E7%BC%96%E8%AF%91OpenCV4-5-1%E5%92%8CContrib%E5%BA%93/cuda.jpg">
+<meta property="og:image" content="http://example.com/2021/0117/%E7%BC%96%E8%AF%91OpenCV4-5-1%E5%92%8CContrib%E5%BA%93/edge.jpg">
+<meta property="article:published_time" content="2021-01-16T18:23:54.000Z">
+<meta property="article:modified_time" content="2021-03-11T20:56:02.348Z">
+<meta property="article:author" content="jinyongzh">
+<meta property="article:tag" content="OpenCV">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/0117/%E7%BC%96%E8%AF%91OpenCV4-5-1%E5%92%8CContrib%E5%BA%93/cuda.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/0117/%E7%BC%96%E8%AF%91OpenCV4-5-1%E5%92%8CContrib%E5%BA%93/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>编译OpenCV4.5.1和Contrib库 | 渊渟无迹</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">渊渟无迹</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-learn"><a href="/learn/" rel="section"><i class="fa fa-book fa-fw"></i>学习</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">5</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">4</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">7</span></a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E6%88%90OpenCV%E7%BC%96%E8%AF%91%E5%B7%A5%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">生成OpenCV编译工程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E4%B8%8E%E4%BB%A3%E7%A0%81%E5%87%86%E5%A4%87"><span class="nav-number">1.1.</span> <span class="nav-text">工具与代码准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CUDA%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.</span> <span class="nav-text">CUDA配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CMake%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.3.</span> <span class="nav-text">CMake设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8MSVC%E7%BC%96%E8%AF%91"><span class="nav-number">1.4.</span> <span class="nav-text">使用MSVC编译</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95OpenCV%E5%8A%A8%E6%80%81%E5%BA%93"><span class="nav-number">2.</span> <span class="nav-text">测试OpenCV动态库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%BA%93%E9%85%8D%E7%BD%AE"><span class="nav-number">2.1.</span> <span class="nav-text">动态库配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E5%8A%A8%E6%80%81%E5%BA%93"><span class="nav-number">2.2.</span> <span class="nav-text">测试动态库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E6%A8%A1%E6%9D%BF%E5%B7%A5%E7%A8%8B"><span class="nav-number">2.3.</span> <span class="nav-text">生成模板工程</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">jinyongzh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jinyongzh" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jinyongzh" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/0117/%E7%BC%96%E8%AF%91OpenCV4-5-1%E5%92%8CContrib%E5%BA%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="jinyongzh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="渊渟无迹">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          编译OpenCV4.5.1和Contrib库
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-17 02:23:54" itemprop="dateCreated datePublished" datetime="2021-01-17T02:23:54+08:00">2021-01-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-12 04:56:02" itemprop="dateModified" datetime="2021-03-12T04:56:02+08:00">2021-03-12</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Programming/" itemprop="url" rel="index"><span itemprop="name">Programming</span></a>
+        </span>
+    </span>
+
+  
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="生成OpenCV编译工程"><a href="#生成OpenCV编译工程" class="headerlink" title="生成OpenCV编译工程"></a>生成OpenCV编译工程</h2><p>&ensp;&ensp;&ensp;&ensp;OpenCV是一个开源的计算机视觉库，集成了很多常用的计算机视觉算法，另外一些需要版权的算法则放到Contrib库里，这里基于VS2019编译CUDA版的OpenCV。</p>
+<a id="more"></a>
+
+<h3 id="工具与代码准备"><a href="#工具与代码准备" class="headerlink" title="工具与代码准备"></a>工具与代码准备</h3><p>&ensp;&ensp;&ensp;&ensp;编译OpenCV需要使用CMake生成VS工程，然后在VS中编译。Eigen是一个矩阵运算库，可有可无，这里还需要安装CUDA和CUDNN，这样就可以让OpenCV使用GPU了。</p>
+<ul>
+<li>工具<ul>
+<li>VS2019</li>
+<li>CMake</li>
+<li>CUDA和CUDNN</li>
+</ul>
+</li>
+<li>源码<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/opencv">OpenCV和OpenCV_Contrib</a></li>
+<li><a target="_blank" rel="noopener" href="https://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen</a></li>
+</ul>
+</li>
+</ul>
+<p>&ensp;&ensp;&ensp;&ensp;OpenCV可以使用CUDA加速，这里需要安装CUDA和CUDNN，另外编译Contrib的时候CMake需要下载一些文件，相应的文件都在<a target="_blank" rel="noopener" href="https://github.com/opencv/opencv_3rdparty">3rdparty</a>的分支上可以找到，如果CMake下载的话需要科学上网，没有科学上网的可以修改hosts或者自己去下载</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// CMake会从这里下载一些OpenCV需要的文件</span>
+<span class="token string">"https://raw.githubusercontent.com/opencv/opencv_3rdparty"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>&ensp;&ensp;&ensp;&ensp;将 <code>raw.githubusercontent.com</code> 解析出来的ip加入hosts就不会下载失败</p>
+<h3 id="CUDA配置"><a href="#CUDA配置" class="headerlink" title="CUDA配置"></a>CUDA配置</h3><p>&ensp;&ensp;&ensp;&ensp;由于要使用CUDA，而显卡架构太多，最好是根据自己的的显卡设置，这样可以提前生成一些需要的代码，加快CUDA初始化的速度。这里的显卡是2070s，以下是需要根据平台设置的两项</p>
+<ul>
+<li><code>CUDA_ARCH_BIN</code> 设置7.5，Nvidia网站有，20系算力都是7.5</li>
+<li><code>CUDA_GENERATION</code> 选Turing，2070s是图灵架构，最新的30系是安培架构</li>
+</ul>
+<h3 id="CMake设置"><a href="#CMake设置" class="headerlink" title="CMake设置"></a>CMake设置</h3><ul>
+<li><code>OPENCV_EXTRA_MODULES_PATH</code> 选择Contrib的路径，然后重新Configure</li>
+<li><code>WITH_EIGEN</code> 勾上，Eigen的配置可以参考<a href="/2021/0118/Eigen%E5%BA%93%E5%8A%A0%E5%85%A5%E5%B7%A5%E7%A8%8B%E7%BC%96%E8%AF%91/" title="Eigen库加入工程编译">Eigen库加入工程编译</a></li>
+<li>如果是Intel的CPU，可以把MKL相关的勾上，这是Intel为自家CPU专门开发的数学运算库，AMD也能用</li>
+<li>OpenMP可选</li>
+<li>OpenCV设置<ul>
+<li>java和python相关的去掉，只需要c++，带test是测试都去掉</li>
+<li><code>WITH_CUDA</code> 和 <code>OPENCV_DNN_CUDA</code> 勾上</li>
+<li><code>BUILD_opencv_world</code> 勾上，最终会链接成一个库</li>
+</ul>
+</li>
+</ul>
+<p>&ensp;&ensp;&ensp;&ensp;Configure以后可以看一下有没有红色的，应该没有红色的，最终再Configure一次，然后Generate和Open Project</p>
+<h3 id="使用MSVC编译"><a href="#使用MSVC编译" class="headerlink" title="使用MSVC编译"></a>使用MSVC编译</h3><p>&ensp;&ensp;&ensp;&ensp;Open Project后，将Install设置为启动项目，然后Debug和Release分别生成一下，最终生产成的动态库和头文件都在install文件夹中，直接使用它就行，整个编译过程大概需要几十分钟</p>
+<h2 id="测试OpenCV动态库"><a href="#测试OpenCV动态库" class="headerlink" title="测试OpenCV动态库"></a>测试OpenCV动态库</h2><p>&ensp;&ensp;&ensp;&ensp;VS所使用的动态链接库，主要有三部分，头文件、.lib导入库和 .dll动态链接库，其中VS只需要头文件和导入库就可以编译，最终运行的时候才需要加载动态链接库去执行调用的方法。</p>
+<h3 id="动态库配置"><a href="#动态库配置" class="headerlink" title="动态库配置"></a>动态库配置</h3><ul>
+<li>install中的x64\vc16\bin的路径加入系统Path</li>
+<li>VS2019生成一个空的C++项目<ul>
+<li>项目属性[所有配置、x64]，VC++目录，加入install中头文件，库目录加入install中lib文件夹</li>
+<li>链接器-&gt;输入-&gt;附加依赖项[Debug和Release分开配置]<ul>
+<li>Debug 写入opencv_img_hash451d.lib opencv_world451d.lib</li>
+<li>Release 写入opencv_img_hash451.lib opencv_world451.lib</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="测试动态库"><a href="#测试动态库" class="headerlink" title="测试动态库"></a>测试动态库</h3><p>&ensp;&ensp;&ensp;&ensp;打印出详细的GPU详细，然后使用GPU对图片进行边缘检测</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;opencv.hpp></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;cudaimgproc.hpp></span></span>
+<span class="token keyword">using</span> <span class="token keyword">namespace</span> cv<span class="token punctuation">;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+	Mat img <span class="token operator">=</span> <span class="token function">imread</span><span class="token punctuation">(</span><span class="token string">"./1.jpg"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">int</span> device <span class="token operator">=</span> cuda<span class="token operator">::</span><span class="token function">getDevice</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	cuda<span class="token operator">::</span><span class="token function">printCudaDeviceInfo</span><span class="token punctuation">(</span>device<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	cuda<span class="token operator">::</span><span class="token function">setDevice</span><span class="token punctuation">(</span>device<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  
+	cuda<span class="token operator">::</span>GpuMat gpuImg<span class="token punctuation">;</span>
+	gpuImg<span class="token punctuation">.</span><span class="token function">upload</span><span class="token punctuation">(</span>img<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	cuda<span class="token operator">::</span><span class="token function">cvtColor</span><span class="token punctuation">(</span>gpuImg<span class="token punctuation">,</span> gpuImg<span class="token punctuation">,</span> COLOR_RGB2GRAY<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Ptr<span class="token operator">&lt;</span>cuda<span class="token operator">::</span>CannyEdgeDetector<span class="token operator">></span> p <span class="token operator">=</span> cuda<span class="token operator">::</span><span class="token function">createCannyEdgeDetector</span><span class="token punctuation">(</span><span class="token number">150</span><span class="token punctuation">,</span> <span class="token number">30</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	p<span class="token operator">-></span><span class="token function">detect</span><span class="token punctuation">(</span>gpuImg<span class="token punctuation">,</span> gpuImg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	gpuImg<span class="token punctuation">.</span><span class="token function">download</span><span class="token punctuation">(</span>img<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+	<span class="token function">imshow</span><span class="token punctuation">(</span><span class="token string">"Edge"</span><span class="token punctuation">,</span> img<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">waitKey</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span> <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>&ensp;&ensp;&ensp;&ensp;GPU信息打出</p>
+<div align=center><img data-src="cuda.jpg" width="700"/></div>
+
+<p>&ensp;&ensp;&ensp;&ensp;边缘检测成功</p>
+<div align=center><img data-src="edge.jpg" width="400"/></div>
+
+<h3 id="生成模板工程"><a href="#生成模板工程" class="headerlink" title="生成模板工程"></a>生成模板工程</h3><p>&ensp;&ensp;&ensp;&ensp;去掉代码文件，项目-&gt;导出模板，以后的项目都可以用这个模板生成了，不用每次都去配置</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/OpenCV/" rel="tag"><i class="fa fa-tag"></i> OpenCV</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/0118/OpenCV%E5%8A%A0%E5%85%A5CMake%E5%B7%A5%E7%A8%8B%E7%BC%96%E8%AF%91/" rel="next" title="OpenCV加入CMake工程编译">
+                  OpenCV加入CMake工程编译 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-at"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">jinyongzh</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">7k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">7 分钟</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pangu@4.0.7/dist/browser/pangu.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+<script>
+if (document.querySelectorAll('.pdf-container').length) {
+  NexT.utils.getScript('https://cdn.jsdelivr.net/npm/pdfobject@2.2.4/pdfobject.min.js', () => {
+    document.querySelectorAll('.pdf-container').forEach(element => {
+      PDFObject.embed(element.dataset.target, element, {
+        pdfOpenParams: {
+          navpanes : 0,
+          toolbar  : 0,
+          statusbar: 0,
+          pagemode : 'thumbs',
+          view     : 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height   : element.dataset.height
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+<script>
+if (document.querySelectorAll('.mermaid').length) {
+  NexT.utils.getScript('https://cdn.jsdelivr.net/npm/mermaid@8.9.1/dist/mermaid.min.js', () => {
+    mermaid.init({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    }, '.mermaid');
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+
+
+
+  
+
+
+</body>
+</html>
